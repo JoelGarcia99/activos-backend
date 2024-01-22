@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  api:
+    container_name: activos-node
+    restart: on-failure
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    networks:
+      - backend-network
+    environment:
+      - API_PORT=8000
+      - DB_HOST=mysql 
+      - DB_PORT=3306
+      - DB_NAME=activos
+      - DB_USER=root
+      - DB_PASS=pass
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:8.3.0-oraclelinux8
+    container_name: activos-mysql
+    restart: on-failure
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data:/var/lib/mysql
+    networks:
+      - backend-network
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+      - MYSQL_DATABASE=activos
+networks:
+  backend-network:
+    driver: bridge
