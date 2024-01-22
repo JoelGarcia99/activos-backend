@@ -1,5 +1,6 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Session } from "./session.entity";
+import { Roles } from "./roles.enum";
 
 @Entity('Usuarios')
 export class User {
@@ -18,7 +19,7 @@ export class User {
   @Column({ name: 'password' })
   password: string;
 
-  @Column({ name: 'rol', enum: ['admin', 'user'], default: 'user' })
+  @Column({ name: 'rol', enum: Roles, default: 'user' })
   role: string;
 
   @Column({ name: 'is_deleted', default: false })

@@ -30,6 +30,7 @@ services:
       - 3306:3306
     volumes:
       - ./data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
     networks:
       - backend-network
     environment:

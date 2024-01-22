@@ -13,6 +13,7 @@ export class AuthController {
   @Get('/ping')
   ping() {
     return {
+      status: "healthy",
       message: "pong"
     };
   }

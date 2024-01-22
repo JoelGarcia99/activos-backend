@@ -10,7 +10,7 @@ export const schema = Joi.object({
   DB_PASS: Joi.string().required(),
   // WARNING: set these env variables in production
   ACCESS_TOKEN_PASS: Joi.string().default("at-secret"),
-  REFRESH_TOKEN_PASS: Joi.string().required(),
+  REFRESH_TOKEN_PASS: Joi.string().default("rt-secret"),
   JWT_EXPIRATION_TIME: Joi.number().default(300), // 5 minutes
   JWT_REFRESH_EXPIRATION_TIME: Joi.number().default(604800), // 1 week
 });
