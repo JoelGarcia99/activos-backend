@@ -4,3 +4,7 @@ export const DB_PORT = process.env.DB_PORT;
 export const DB_NAME = process.env.DB_NAME;
 export const DB_USER = process.env.DB_USER;
 export const DB_PASS = process.env.DB_PASS;
+export const ACCESS_TOKEN_PASS = process.env.ACCESS_TOKEN_PASS;
+export const REFRESH_TOKEN_PASS = process.env.REFRESH_TOKEN_PASS;
+export const JWT_EXPIRATION_TIME = process.env.JWT_EXPIRATION_TIME;
+export const JWT_REFRESH_EXPIRATION_TIME = process.env.JWT_REFRESH_EXPIRATION_TIME;
