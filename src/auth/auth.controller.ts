@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-user.dto';
 import { UpdateAuthDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from './guards/auth.guard';
+import { ResponseBuilder } from 'src/utils/response/builder';
 
 @Controller('auth')
 export class AuthController {
@@ -18,9 +19,13 @@ export class AuthController {
     };
   }
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Get('/admins')
+  @UseGuards(JwtAuthGuard)
+  async listAdmins(request: Request) {
+    return ResponseBuilder.build(
+      request,
+      async (_) => await this.authService.loadAdmins(),
+    );
   }
 
   @Get()
