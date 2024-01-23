@@ -175,19 +175,6 @@ export class AuthService {
   }
 
   /**
-   * Checks the status of an user's session. It'll return an unauthorized 
-   * exception if the token is experid or the user object if it's valid
-   */
-  async checkStatus(userId: number) {
-    return await this.authRepository.findOne({
-      where: {
-        id: userId,
-      },
-    });
-  }
-
-
-  /**
   * Updates an user and/or his password. It's not allowed to update the role, you must 
   * call the proper service if you want to update the role
   */

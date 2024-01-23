@@ -41,12 +41,15 @@ export class SecurityUtil {
       }
     }
 
+    // suffling the password to increase entrophy 
+    password = password.split('').sort(() => Math.random() - 0.5).join('');
+
     return password;
   }
 
   /**
    * It's used to authorize an specific role on the guards, it's invoked by the 
-   * ``
+   * `canActivate` method of guards
    */
   async authorizeActivation(context: ExecutionContext, role: Roles) {
 
@@ -59,8 +62,9 @@ export class SecurityUtil {
     const user = await this.authRepository.findOne({
       where: {
         id: guardOutput.userId,
+        isDeleted: false
       },
-    })
+    });
 
     // The user will always exist so we don't have to make that condition here
     return user?.role === role;
