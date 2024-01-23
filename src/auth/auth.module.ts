@@ -8,12 +8,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtAuthGuard } from './guards/auth.guard';
 import { TokensService } from 'src/jwt/service';
 import { SecurityUtil } from 'src/utils/security';
+import { JwtStrategy } from 'src/jwt/strategy';
+import { EnvValue } from 'src/environment/variables';
 
 const jwtRegistration = JwtModule.registerAsync({
   imports: [],
   useFactory: () => ({
-    secret: process.env.JWT_SECRET,
-    signOptions: { expiresIn: process.env.JWT_EXPIRATION_TIME },
+    secret: EnvValue.ACCESS_TOKEN_PASS,
+    signOptions: { expiresIn: EnvValue.JWT_EXPIRATION_TIME },
   }),
 });
 
@@ -25,8 +27,9 @@ const typeOrmFeatures = TypeOrmModule.forFeature([
   controllers: [AuthController],
   providers: [
     AuthService,
-    JwtAuthGuard,
     TokensService,
+    JwtAuthGuard,
+    JwtStrategy,
     SecurityUtil,
   ],
   imports: [

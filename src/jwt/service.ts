@@ -78,7 +78,7 @@ export class TokensService {
   async checkRefreshToken(refreshToken: string): Promise<TokenCheckOutput> {
 
     const decodedToken: RefreshTokenPayload | null = this.jwtService.verify(refreshToken, {
-      secret: process.env.REFRESH_TOKEN_PASS,
+      secret: EnvValue.REFRESH_TOKEN_PASS,
       ignoreExpiration: true,
     });
 
@@ -120,7 +120,7 @@ export class TokensService {
 
     try {
       decodedToken = this.jwtService.verify(accessToken, {
-        secret: process.env.ACCESS_TOKEN_PASS,
+        secret: EnvValue.ACCESS_TOKEN_PASS,
         ignoreExpiration: true,
       });
     } catch (e) {
@@ -160,7 +160,7 @@ export class TokensService {
   */
   decodeAccessToken(accessToken: string, ignoreExpiration = false): AccessTokenPayload {
     return this.jwtService.verify(accessToken, {
-      secret: process.env.ACCESS_TOKEN_PASS,
+      secret: EnvValue.ACCESS_TOKEN_PASS,
       ignoreExpiration: ignoreExpiration,
     });
   }

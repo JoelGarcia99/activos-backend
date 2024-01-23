@@ -6,7 +6,6 @@ import * as argon2 from '@node-rs/argon2';
 import { randomBytes } from 'crypto';
 import { Roles } from './auth/entities/roles.enum';
 import { EnvValue } from './environment/variables';
-import { schema } from './environment/initialization';
 
 @Injectable()
 export class AppService {
@@ -15,18 +14,6 @@ export class AppService {
     @InjectRepository(User)
     private readonly authRepository: Repository<User>,
   ) {
-
-    // validating environment schema
-    const result = schema.validate({
-      ...process.env
-    }, { allowUnknown: true });
-
-    if (result.error) {
-      throw new Error(result.error.message);
-    }
-
-    // Initializing env variables with new values
-    EnvValue.init();
 
     console.warn("=============================================")
     console.warn("If you see it too often, please report it. 💀");

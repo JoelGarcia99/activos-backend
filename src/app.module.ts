@@ -21,9 +21,6 @@ export const typeOrmRootConfig = TypeOrmModule.forRoot({
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      validationSchema: envSchema,
-    }),
     typeOrmRootConfig,
     ThrottlerModule.forRoot([{
       // it stands for: allow up to 100 requests within a period of 60 seconds
@@ -33,8 +30,8 @@ export const typeOrmRootConfig = TypeOrmModule.forRoot({
     AuthModule,
   ],
   providers: [
-    AuthService,
     AppService,
+    AuthService,
   ],
 })
 export class AppModule { }

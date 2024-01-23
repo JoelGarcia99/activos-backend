@@ -11,7 +11,7 @@ import * as argon2 from '@node-rs/argon2';
 import { randomBytes } from 'crypto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SecurityUtil } from 'src/utils/security';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
 import { EnvValue } from 'src/environment/variables';
 
 @Injectable()
@@ -42,71 +42,65 @@ export class AuthService {
     return admins;
   }
 
+  /**
+   * Login for all the user roles. It'll generate a new session and stored in on the DB 
+   * and will return the issued access token to the user.
+   *
+   * @param {LoginDto} loginDto
+   */
   async login(loginDto: LoginDto) {
 
-    let accessToken: string;
-    let finalUser: User;
-    let isUsingInitialPassword: boolean;
+    const { email, password } = loginDto;
 
-    // executing an ACID transaction to rollback everything if any error is 
-    // encountered
-    try {
-      // validating IP is a valid IP format
-      const { email, password } = loginDto;
-
-      // querying the user on DB
-      const dbUser = await this.authRepository.findOne({
-        where: {
-          email,
-        }
-      });
-
-      if (!dbUser) {
-        throw new BadRequestException(['Las credenciales no son correctas']);
+    // querying the user on DB
+    const dbUser = await this.authRepository.findOne({
+      where: {
+        email,
       }
+    });
 
-      const isPasswordValid = argon2.verify(
-        dbUser.password,
-        password,
-      );
-
-      if (!isPasswordValid) {
-        throw new BadRequestException(['Las credenciales no son correctas']);
-      }
-
-      // generating the refresh token
-      const refreshToken = await this.tokensService.createRefreshToken(
-        dbUser.id,
-      );
-
-      // removing all older sessions 
-      await this.sessionRepository.delete({
-        userId: dbUser.id,
-      });
-
-      // saving the refresh token into DB
-      const newSession = this.sessionRepository.create({
-        userId: dbUser.id,
-        refreshToken,
-      });
-
-      // creating the new session with a new rotation refresh token
-      const session: AuthSession = await this.sessionRepository.save(newSession);
-
-      // creating the new AT
-      accessToken = await this.tokensService.createAccessToken(session);
-      finalUser = dbUser;
-
-      // removing the password 
-      delete finalUser.password;
-    } catch (e) {
-      // console.error(`${dayjs().format("DD/MM/YYYY HH:mm:ss")} | 💀\tError while logging: `, e);
-      throw new BadRequestException([e?.detail ?? e?.response?.message[0] ?? "Petición fallida. Intente más tarde"]);
+    if (!dbUser) {
+      throw new BadRequestException(['Las credenciales no son correctas']);
     }
 
+    const isPasswordValid = argon2.verifySync(
+      dbUser.password,
+      password,
+    );
+
+    if (!isPasswordValid) {
+      throw new BadRequestException(['Las credenciales no son correctas']);
+    }
+
+    // generating the refresh token
+    const refreshToken = await this.tokensService.createRefreshToken(
+      dbUser.id,
+    );
+
+    // removing all older sessions 
+    await this.sessionRepository.delete({
+      userId: dbUser.id,
+    });
+
+    // saving the refresh token into DB
+    const newSession = this.sessionRepository.create({
+      userId: dbUser.id,
+      refreshToken,
+    });
+
+    // creating the new session with a new rotation refresh token
+    const session: AuthSession = await this.sessionRepository.save(newSession);
+
+    // creating the new AT and linking it to an existing rerfresh token. The lifetime of
+    // the whole session deppends on both, the integrity of the access token as well as 
+    // the data stored on the sesion table
+    let accessToken = await this.tokensService.createAccessToken(session);
+
+    // removing the password 
+    delete dbUser.password;
+
     return {
-      user: finalUser,
-      isUsingInitialPassword,
+      user: dbUser,
       accessToken,
     };
   }
@@ -250,7 +244,7 @@ export class AuthService {
 
 
   /**
-   * Creates a new user
+   * Creates a new user [ADMIN, USER] only.
    */
   async register(createUserDto: CreateUserDto) {
 
@@ -263,10 +257,6 @@ export class AuthService {
     // encountered
     try {
       await this.entityManager.transaction(async (em) => {
-
-        if (createUserDto.role === 'root') {
-          throw new ForbiddenException(['El rol no puede ser root']);
-        }
 
         const password = argon2.hashSync(
           generatedPassword,

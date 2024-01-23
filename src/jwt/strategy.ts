@@ -49,7 +49,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   * The payload for generating a new access token if needed.
   */
   async validate(req: Request, payload: AccessTokenPayload): Promise<JwtStrategyOutput> {
-    const bearerToken = req.headers['Authorization'].split(' ')[1];
+    // WARNING: do not change the 'authorization' by 'Authorization' even if it's defined 
+    // that way on the client. When it comes to this point it's preprocessed so changing 
+    // this could lead to unexpected behaviors
+    const bearerToken = req.headers['authorization'].split(' ')[1];
 
     const { userId, rtId } = payload;
 
@@ -116,7 +119,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         // in the case the AT is still valid then just use it
         accessToken = bearerToken;
       }
-
     } catch (e) {
       console.error(e);
       throw e;

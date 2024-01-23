@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsEmail, IsEnum, IsString, Length } from "class-validator";
+import { IsEmail, IsEnum, IsOptional, IsString, Length } from "class-validator";
 import { Roles } from "../entities/roles.enum";
 
 /**
@@ -11,10 +11,15 @@ export class CreateUserDto {
   @Transform((value) => value.value.trim())
   name: string;
 
+  @IsString()
+  @Transform((value) => value.value.trim())
+  @IsOptional()
+  lastName?: string;
+
   @IsEnum(
-    Roles,
+    [Roles.ADMIN, Roles.USER],
     {
-      message: "El rol debe ser admin o user"
+      message: "El rol solo puede ser admin o user"
     }
   )
   role: string;

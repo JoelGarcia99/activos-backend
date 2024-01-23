@@ -1,9 +1,9 @@
 import { Transform } from "class-transformer";
-import { IsString } from "class-validator";
+import { IsEmail, IsString } from "class-validator";
 
 export class LoginDto {
 
-  @IsString({ message: "El nombre de usuario no es válido" })
+  @IsEmail({}, { message: "El correo no es válido" })
   @Transform((value) => value.value.trim().toLowerCase())
   email: string;
 
