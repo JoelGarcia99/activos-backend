@@ -2,8 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { RefreshTokenPayload } from "./rt.payload";
 import { JwtService } from "@nestjs/jwt";
 import { AccessTokenPayload } from "./at.payload";
-import { ACCESS_TOKEN_PASS, JWT_EXPIRATION_TIME, JWT_REFRESH_EXPIRATION_TIME, REFRESH_TOKEN_PASS } from "src/environment/variables";
 import { Session } from "src/auth/entities/session.entity";
+import { EnvValue } from "src/environment/variables";
 
 interface TokenCheckOutput {
   isValid: boolean;
@@ -32,8 +32,8 @@ export class TokensService {
     const refreshToken = this.jwtService.sign(
       payload,
       {
-        expiresIn: JWT_REFRESH_EXPIRATION_TIME,
-        secret: REFRESH_TOKEN_PASS,
+        expiresIn: EnvValue.JWT_REFRESH_EXPIRATION_TIME,
+        secret: EnvValue.REFRESH_TOKEN_PASS,
       },
     );
 
@@ -61,8 +61,8 @@ export class TokensService {
     const accessToken = this.jwtService.sign(
       payload,
       {
-        expiresIn: JWT_EXPIRATION_TIME,
-        secret: ACCESS_TOKEN_PASS,
+        expiresIn: EnvValue.JWT_EXPIRATION_TIME,
+        secret: EnvValue.ACCESS_TOKEN_PASS,
       },
     );
 

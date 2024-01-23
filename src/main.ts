@@ -1,11 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { API_PORT } from './environment/variables';
 import { ValidationPipe } from '@nestjs/common';
+import { LoggerMiddleware } from './utils/logger';
+import { EnvValue } from './environment/variables';
 
 async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
+
+  app.use(new LoggerMiddleware().use);
 
   app.enableCors({
     origin: '*',
@@ -23,7 +26,7 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api');
-  await app.listen(API_PORT);
+  await app.listen(EnvValue.API_PORT);
 }
 
 bootstrap();

@@ -5,8 +5,8 @@ import { Repository } from "typeorm";
 import { UnauthorizedException } from "@nestjs/common";
 import { AccessTokenPayload } from "./at.payload";
 import { Session } from "src/auth/entities/session.entity";
-import { ACCESS_TOKEN_PASS } from "src/environment/variables";
 import { TokensService } from "./service";
+import { EnvValue } from "src/environment/variables";
 
 export interface JwtStrategyOutput {
   rtId: number;
@@ -33,7 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       // refresh token
       ignoreExpiration: true,
       passReqToCallback: true,
-      secretOrKey: ACCESS_TOKEN_PASS,
+      secretOrKey: EnvValue.ACCESS_TOKEN_PASS,
     });
   }
 

@@ -1,21 +1,22 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { schema as envSchema } from './environment/initialization';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER } from './environment/variables';
+import { AuthService } from './auth/auth.service';
+import { AppService } from './app.service';
+import { EnvValue } from './environment/variables';
 
 export const typeOrmRootConfig = TypeOrmModule.forRoot({
   type: 'mysql',
-  host: DB_HOST,
-  port: +DB_PORT,
-  username: DB_USER,
-  password: DB_PASS,
-  database: DB_NAME,
+  host: EnvValue.DB_HOST,
+  port: +EnvValue.DB_PORT,
+  username: EnvValue.DB_USER,
+  password: EnvValue.DB_PASS,
+  database: EnvValue.DB_NAME,
   autoLoadEntities: true,
+
 });
 
 @Module({
@@ -31,7 +32,9 @@ export const typeOrmRootConfig = TypeOrmModule.forRoot({
     }]),
     AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AuthService,
+    AppService,
+  ],
 })
 export class AppModule { }

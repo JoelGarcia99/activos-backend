@@ -3,13 +3,14 @@ import { Roles } from "../entities/roles.enum";
 import { SecurityUtil } from "src/utils/security";
 
 @Injectable()
-export class AdminGuard implements CanActivate {
+export class RootGuard implements CanActivate {
 
-  constructor(
-    private readonly securityUtils: SecurityUtil,
+  public constructor(
+    private securityUtils: SecurityUtil,
   ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    return await this.securityUtils.authorizeActivation(context, Roles.ADMIN);
+    return await this.securityUtils.authorizeActivation(context, Roles.ROOT);
   }
+
 }

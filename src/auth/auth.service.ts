@@ -12,6 +12,7 @@ import { randomBytes } from 'crypto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SecurityUtil } from 'src/utils/security';
 import dayjs from 'dayjs';
+import { EnvValue } from 'src/environment/variables';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,7 @@ export class AuthService {
   public constructor(
     @InjectRepository(User)
     private readonly authRepository: Repository<User>,
-    @InjectRepository(Session)
+    @InjectRepository(AuthSession)
     private readonly sessionRepository: Repository<AuthSession>,
     private readonly tokensService: TokensService,
     private readonly securityUtil: SecurityUtil,
@@ -270,7 +271,7 @@ export class AuthService {
         const password = argon2.hashSync(
           generatedPassword,
           {
-            salt: randomBytes(10)
+            salt: randomBytes(EnvValue.SALT_LENGTH)
           }
         );
 
@@ -369,7 +370,7 @@ export class AuthService {
         updateUserDto.password,
         {
           // random salt 
-          salt: randomBytes(10),
+          salt: randomBytes(EnvValue.SALT_LENGTH),
         }
       );
 
