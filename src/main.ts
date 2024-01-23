@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { LoggerMiddleware } from './utils/logger';
 import { EnvValue } from './environment/variables';
 import { schema as envSchema } from './environment/initialization';
+import 'dotenv/config'
 
 async function bootstrap() {
 

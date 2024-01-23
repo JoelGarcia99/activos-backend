@@ -13,6 +13,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { SecurityUtil } from 'src/utils/security';
 import * as dayjs from 'dayjs';
 import { EnvValue } from 'src/environment/variables';
+import { DbOutputProcessor } from 'src/utils/processors/mysql.errors';
+import { MailUtil } from 'src/utils/mail';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +28,7 @@ export class AuthService {
     private readonly securityUtil: SecurityUtil,
     @InjectEntityManager()
     private readonly entityManager: EntityManager,
+    private readonly mailUtil: MailUtil,
   ) { }
 
   /**
@@ -265,10 +268,9 @@ export class AuthService {
           }
         );
 
-        const user = await this.authRepository.save({
+        const user = this.authRepository.create({
           ...createUserDto,
           password,
-          initialPassword: password,
         });
 
         // saving the user
@@ -280,30 +282,22 @@ export class AuthService {
       });
     } catch (e) {
       console.error(`${dayjs().format("DD/MM/YYYY HH:mm:ss")} | 💀\tError while registering user: `, e);
-      throw new BadRequestException([e?.detail ?? "Petición fallida. Intente más tarde"]);
+      throw new BadRequestException([DbOutputProcessor.processError(e)]);
     }
 
-    // await this.mailUtil.sendEmail({
-    //   to: [
-    //     {
-    //       email: finalUser.email,
-    //       name: finalUser.name,
-    //     },
-    //   ],
-    //   subject: "Cuenta Hermes creada con éxito",
-    //   textPart: "Sus credenciales de Hermes han sido generadas",
-    //   htmlPart: "<h2>Guarde sus credenciales en un lugar seguro</h2>" +
-    //     "<br><span>Usuario: " + finalUser.username + "</span>" +
-    //     "<br><span>Contraseña: " + generatedPassword + "</span>" +
-    //     "<br><span>Rol: " + finalUser.role + "</span>" +
-    //     "<br><br><b>Recuerde que debe cambiar la contraseña al iniciar sesión</b>",
-    //   customID: "account-creation-" + finalUser.id,
-    // });
+    // mailing 
+    await this.mailUtil.sendAccountCreationEmail({
+      to: finalUser.email,
+      data: {
+        password: generatedPassword,
+        role: createUserDto.role,
+      }
+    });
 
     return {
       user: finalUser,
       message: [
-        "Las credenciales han sido enviadas al email del usuario"
+        "Usuario creado correctamente, las credenciales han sido enviadas por correo"
       ],
     };
   }

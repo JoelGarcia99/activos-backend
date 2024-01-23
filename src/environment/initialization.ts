@@ -14,5 +14,6 @@ export const schema = Joi.object({
   JWT_EXPIRATION_TIME: Joi.number().default(300), // 5 minutes
   JWT_REFRESH_EXPIRATION_TIME: Joi.number().default(604800), // 1 week
   SALT_LENGTH: Joi.number().min(10).max(16).default(10),
+  SENDGRID_API_KEY: Joi.string().required(),
   TZ: Joi.string().default("America/Guayaquil"),
 });

@@ -14,6 +14,7 @@ export class EnvValue {
   public static JWT_REFRESH_EXPIRATION_TIME = +process.env.JWT_REFRESH_EXPIRATION_TIME;
   public static SALT_LENGTH = +process.env.SALT_LENGTH;
   public static TZ = process.env.TZ;
+  public static SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 
 
   /**
@@ -37,6 +38,7 @@ export class EnvValue {
     EnvValue.JWT_REFRESH_EXPIRATION_TIME = +values.JWT_REFRESH_EXPIRATION_TIME;
     EnvValue.SALT_LENGTH = +values.SALT_LENGTH;
     EnvValue.TZ = values.TZ;
+    EnvValue.SENDGRID_API_KEY = values.SENDGRID_API_KEY;
 
     console.log("Setting timezone for", EnvValue.TZ, "⏱️");
   }

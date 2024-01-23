@@ -10,6 +10,7 @@ import { TokensService } from 'src/jwt/service';
 import { SecurityUtil } from 'src/utils/security';
 import { JwtStrategy } from 'src/jwt/strategy';
 import { EnvValue } from 'src/environment/variables';
+import { MailUtil } from 'src/utils/mail';
 
 const jwtRegistration = JwtModule.registerAsync({
   imports: [],
@@ -29,6 +30,7 @@ const typeOrmFeatures = TypeOrmModule.forFeature([
     AuthService,
     TokensService,
     JwtAuthGuard,
+    MailUtil,
     JwtStrategy,
     SecurityUtil,
   ],
@@ -45,6 +47,7 @@ const typeOrmFeatures = TypeOrmModule.forFeature([
     TokensService,
     User,
     jwtRegistration,
+    MailUtil,
   ]
 })
 export class AuthModule { }

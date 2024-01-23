@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, UseGuards, Post } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, UseGuards, Post, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/auth.guard';
 import { ResponseBuilder } from 'src/utils/response/builder';
@@ -24,7 +24,9 @@ export class AuthController {
   // TODO: test it
   @Get('/admins')
   @UseGuards(JwtAuthGuard, RootGuard)
-  async listAdmins(request: Request) {
+  async listAdmins(
+    @Request() request: Request
+  ) {
     return ResponseBuilder.build(
       request,
       async (_) => await this.authService.loadAdmins(),
@@ -36,7 +38,10 @@ export class AuthController {
    */
   @Post('/register')
   @UseGuards(JwtAuthGuard, RootGuard)
-  async register(request: Request, @Body() createUserDto: CreateUserDto) {
+  async register(
+    @Request() request: Request,
+    @Body() createUserDto: CreateUserDto
+  ) {
 
     console.log(`INFO: Root user is trying to register a new user with role ${createUserDto.role}`);
     return ResponseBuilder.build(
