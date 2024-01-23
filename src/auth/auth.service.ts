@@ -1,9 +1,8 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, Session } from '@nestjs/common';
-import { UpdateAuthDto } from './dto/update-user.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Session as AuthSession } from './entities/session.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Not, Repository } from 'typeorm';
 import { Roles } from './entities/roles.enum';
 import { LoginDto } from './dto/login.dto';
 import { TokensService } from 'src/jwt/service';
@@ -15,6 +14,10 @@ import * as dayjs from 'dayjs';
 import { EnvValue } from 'src/environment/variables';
 import { DbOutputProcessor } from 'src/utils/processors/mysql.errors';
 import { MailUtil } from 'src/utils/mail';
+import { JwtStrategyOutput } from 'src/jwt/strategy';
+import { Recovery } from './entities/recovery.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +27,8 @@ export class AuthService {
     private readonly authRepository: Repository<User>,
     @InjectRepository(AuthSession)
     private readonly sessionRepository: Repository<AuthSession>,
+    @InjectRepository(Recovery)
+    private readonly recoveryRepository: Repository<Recovery>,
     private readonly tokensService: TokensService,
     private readonly securityUtil: SecurityUtil,
     @InjectEntityManager()
@@ -34,15 +39,18 @@ export class AuthService {
   /**
   * Loads all the registered admins on the DB
   */
-  async loadAdmins() {
+  async loadUsers() {
     const admins = await this.authRepository.find({
       where: {
-        role: Roles.ADMIN,
+        role: Not(Roles.ROOT),
         isDeleted: false,
       }
     });
 
-    return admins;
+    return admins.map((admin) => {
+      delete admin.password;
+      return admin;
+    });
   }
 
   /**
@@ -59,6 +67,7 @@ export class AuthService {
     const dbUser = await this.authRepository.findOne({
       where: {
         email,
+        isDeleted: false
       }
     });
 
@@ -107,143 +116,6 @@ export class AuthService {
       accessToken,
     };
   }
-
-  /**
-   * It just deletes the entire session so the access token can't find its associated 
-   * refresh token anymore.
-   */
-  async logout(rtId: number) {
-
-    await this.sessionRepository.delete({
-      id: rtId,
-    });
-
-    return {
-      message: [
-        'Sesión cerrada exitosamente',
-      ]
-    }
-  }
-
-  // async sendRecoveryCode(email: string) {
-  //
-  //   const output = {
-  //     message: [
-  //       "Si el correo es correcto, un email con el código de recuperación será enviado",
-  //     ]
-  //   };
-  //
-  //   // searching if the email is part of our DB
-  //   const user = await this.userRepository.findOne({
-  //     where: {
-  //       email: email.trim(),
-  //     },
-  //   });
-  //
-  //   // if it isn't don't send any email to save resources
-  //   if (!user) {
-  //     return output;
-  //   }
-  //
-  //   // validating if the recovery code wasn't send in the last 5 minutes
-  //   const lastRecovery = await this.recoveryRepository.find({
-  //     where: {
-  //       userId: user.id,
-  //     },
-  //     order: {
-  //       createdAt: 'DESC',
-  //     }
-  //   });
-  //
-  //   if (lastRecovery.length > 0) {
-  //     // checking expiration date
-  //     const now = dayjs();
-  //     const lastRecoveryDate = dayjs(lastRecovery[0].createdAt);
-  //
-  //     // if the last code is less than 5 minutes long don't send it
-  //     if (now.diff(lastRecoveryDate, 'minutes') < 5) {
-  //       return {
-  //         message: [
-  //           "Ya ha generado un código de recuperación. Intente más tarde",
-  //         ]
-  //       };
-  //     }
-  //
-  //     // removing all the non used recovery codes
-  //     await this.recoveryRepository.remove(lastRecovery);
-  //   }
-  //
-  //   const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
-  //
-  //   // NOTE: IT's ok to run it at background
-  //   this.mailUtil.sendEmail({
-  //     to: [
-  //       {
-  //         email: user.email,
-  //         name: user.name,
-  //       }
-  //     ],
-  //     subject: 'Recuperación de contraseña',
-  //     textPart: "Su código de recuperación ha sido generado",
-  //     htmlPart: `Su código de recuperación es: ${recoveryCode}`,
-  //     customID: 'recovery-code',
-  //   });
-  //
-  //   // NOTE: If any error is encountered on the post method then this point is 
-  //   // never reached so it's ok to proceed without any explicit validation
-  //   await this.recoveryRepository.save({
-  //     recoveryCode,
-  //     userId: user.id,
-  //   });
-  //
-  //   return output;
-  // }
-
-  // async changePassword(body: ChangePasswordDto) {
-  //   // looking for the generated code on DB
-  //   const recovery = await this.recoveryRepository.findOne({
-  //     where: {
-  //       recoveryCode: body.recoveryCode,
-  //     },
-  //   });
-  //
-  //   if (!recovery || recovery.recoveryCode !== body.recoveryCode) {
-  //     throw new BadRequestException(['El código de recuperación no es válido']);
-  //   }
-  //
-  //   const createdAt = dayjs(recovery.createdAt)
-  //
-  //   if (dayjs(createdAt) < dayjs().subtract(5, 'minutes')) {
-  //     throw new BadRequestException(['El código de recuperación ha expirado']);
-  //   }
-  //
-  //   // extracting the user id
-  //   const user = await this.userRepository.findOne({
-  //     where: {
-  //       id: recovery.userId,
-  //     },
-  //   });
-  //
-  //   // hashing the password
-  //   const { newPassword } = body;
-  //   const hashedPassword = bcrypt.hashSync(
-  //     newPassword,
-  //     environment.hashSalts,
-  //   );
-  //
-  //   await this.userRepository.save({
-  //     ...user,
-  //     password: hashedPassword,
-  //   });
-  //
-  //   await this.recoveryRepository.remove(recovery);
-  //
-  //   return {
-  //     message: [
-  //       'Contraseña restablecida exitosamente',
-  //     ],
-  //   }
-  // }
 
 
   /**
@@ -319,58 +191,311 @@ export class AuthService {
   * Updates an user and/or his password. It's not allowed to update the role, you must 
   * call the proper service if you want to update the role
   */
-  async updateUser(userId: number, updateUserDto: UpdateAuthDto) {
+  async updateUser(guardOutput: JwtStrategyOutput, updateUserDto: UpdateUserDto) {
 
-    delete updateUserDto.role;
+    // extracting the user ID from the session
+    const { userId } = guardOutput;
+
+    // looking for the already registered user in the DB so I can remove the old
+    // profile image if needed
+    const dbUser = await this.authRepository.findOne({
+      where: { id: userId, isDeleted: false },
+    });
+
+    if (!dbUser) {
+      throw new NotFoundException('Usuario no existe');
+    }
+
+    // deleting non needed fields
+    const user = { ...updateUserDto }
+
+    console.log("User", user, updateUserDto)
+
+    let newHashedPassword: string | undefined = undefined;
+
+    if (updateUserDto.oldPassword) {
+      // verifying if the old password matches the user password 
+      const isMatch = argon2.verifySync(dbUser.password, updateUserDto.oldPassword);
+
+      if (!isMatch) {
+        throw new BadRequestException(["Las contraseñas no coinciden"])
+      }
+
+      newHashedPassword = argon2.hashSync(updateUserDto.password, {
+        salt: randomBytes(EnvValue.SALT_LENGTH)
+      });
+    }
+
+    try {
+      await this.authRepository.save(
+        {
+          id: userId,
+          ...user,
+          password: newHashedPassword,
+          updatedAt: new Date(),
+        }
+      );
+
+    } catch (e) {
+      if (e.code === '23505' && e.detail.includes('email')) {
+        throw new BadRequestException({
+          error: 'El correo ya existe',
+          detail: e.detail,
+        });
+      }
+
+      if (e.code === '23505' && e.detail.includes('cellphone')) {
+        throw new BadRequestException({
+          error: 'El celular ya existe',
+          detail: e.detail,
+        });
+      }
+
+      throw e;
+    }
+
+    delete dbUser.password;
+    delete user.password;
+
+    return {
+      ...dbUser,
+      ...user,
+    }
+  }
+
+
+  /**
+  *
+  * Checks if an user has a valid & active session
+  */
+  async checkSession(guardOutput: JwtStrategyOutput) {
+
+    // If the request flow reaches this point then it means the guard 
+    // was able to refresh/validate the AT against the RT so everything
+    // is ok so far
+    const userId = guardOutput.userId;
 
     const user = await this.authRepository.findOne({
-      select: {
-        id: true,
-        password: true,
-      },
+      where: { id: userId, isDeleted: false },
+    });
+
+    if (!user) {
+      throw new NotFoundException("Sesión no válida");
+    }
+
+    delete user.password;
+
+    return {
+      user,
+      accessToken: guardOutput.accessToken,
+    };
+  }
+
+  /**
+   * Removes the session record on the DB so the issued access token gets invalidated
+   *
+   */
+  async logout(guardOutput: JwtStrategyOutput) {
+
+    const { rtId } = guardOutput;
+
+    // revoking all the active sessions of the [userId] for the target [deviceId]
+    await this.sessionRepository.delete({
+      id: rtId,
+    });
+
+    return {
+      accessToken: null,
+    };
+  }
+
+
+  /**
+   * Sends a recovery code to the email of the provided [email]. It's necessary in order 
+   * to being able to reset the password. It uses obscure response so it always return 
+   * the same no matter the error or success.
+   */
+  async sendRecoveryCode(email: string) {
+
+    const output = {
+      message: [
+        `Si el correo ${email} existe recivirá un código de recuperación`,
+      ]
+    };
+
+    // searching if the email is part of our DB
+    const user = await this.authRepository.findOne({
       where: {
-        id: userId,
-        isDeleted: false,
+        email: email.trim(),
+      },
+    });
+
+    // if it isn't don't send any email to save resources
+    if (!user) {
+      console.log("No user found");
+      return output;
+    }
+
+    console.log("Recovering password for the user: ", user);
+
+    // validating if the recovery code wasn't send in the last 5 minutes
+    const lastRecovery = await this.recoveryRepository.find({
+      where: {
+        userId: user.id,
+      },
+      order: {
+        createdAt: 'DESC',
+      }
+    });
+
+    if (lastRecovery.length > 0) {
+      // checking expiration date
+      const now = dayjs();
+      const lastRecoveryDate = dayjs(lastRecovery[0].createdAt);
+
+      // if the last code is less than 5 minutes long don't send it
+      if (now.diff(lastRecoveryDate, 'minutes') < 5) {
+        return {
+          message: [
+            "Ya ha generado un código de recuperación. Intente más tarde",
+          ]
+        };
+      }
+
+      // removing all the non used recovery codes
+      await this.recoveryRepository.remove(lastRecovery);
+    }
+
+    const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // NOTE: IT's ok to run it at background
+    await this.mailUtil.sendRecoveryCode({
+      to: user.email,
+      data: {
+        user: user.name,
+        recovery_code: recoveryCode
+      }
+    });
+
+    // NOTE: If any error is encountered on the post method then this point is 
+    // never reached so it's ok to proceed without any explicit validation
+    await this.recoveryRepository.save({
+      recoveryCode,
+      userId: user.id,
+    });
+
+    return output;
+  }
+
+  /**
+  * Changes the password based on the recovery code sent to the user email.
+  */
+  async changePassword(body: ChangePasswordDto) {
+    // looking for the generated code on DB
+    const recovery = await this.recoveryRepository.findOne({
+      where: {
+        recoveryCode: body.recoveryCode,
+      },
+    });
+
+    if (!recovery || recovery.recoveryCode !== body.recoveryCode) {
+      throw new BadRequestException(['El código de recuperación no es válido']);
+    }
+
+    const createdAt = dayjs(recovery.createdAt)
+
+    if (dayjs(createdAt) < dayjs().subtract(5, 'minutes')) {
+      throw new BadRequestException(['El código de recuperación ha expirado']);
+    }
+
+    // extracting the user id
+    const user = await this.authRepository.findOne({
+      where: {
+        id: recovery.userId,
+      },
+    });
+
+    // hashing the password
+    const { newPassword } = body;
+    const hashedPassword = argon2.hashSync(
+      newPassword,
+      {
+        salt: randomBytes(EnvValue.SALT_LENGTH),
+      }
+    );
+
+    await this.authRepository.save({
+      ...user,
+      password: hashedPassword,
+    });
+
+    await this.recoveryRepository.remove(recovery);
+
+    return {
+      message: [
+        'Contraseña restablecida exitosamente',
+      ],
+    }
+  }
+
+  /**
+  * Deactivas an user account [soft delete]
+  */
+  async deactivateUser(email: string) {
+    // searching the target user
+    const user = await this.authRepository.findOne({
+      where: {
+        email: email.trim().toLowerCase(),
       },
     });
 
     if (!user) {
-      throw new NotFoundException(['El usuario no existe o está inactivo']);
+      throw new NotFoundException('El usuario a desactivar no existe');
     }
 
-    // the role cannot be changed
-    delete updateUserDto.role;
+    const targetRoles = user.role;
 
-    // if the password is present then continue with the flow to update it
-    if (updateUserDto.password) {
-
-      // verifying if the old password matches the current one 
-      if (!argon2.verifySync(user.password, updateUserDto.oldPassword)) {
-        throw new BadRequestException(['La contraseña actual no es válida']);
-      }
-
-      // hashing the new password
-      user.password = argon2.hashSync(
-        updateUserDto.password,
-        {
-          // random salt 
-          salt: randomBytes(EnvValue.SALT_LENGTH),
-        }
-      );
-
-      updateUserDto.password = user.password;
+    // if target role is a root then abort the mission
+    if (targetRoles === Roles.ROOT) {
+      throw new ForbiddenException(["El usuario ROOT no puede ser eliminado"]);
     }
 
-    // deleting the old password entry since it doesn't exist on DB
-    delete updateUserDto.oldPassword;
-
-    await this.authRepository.update(userId, {
-      ...updateUserDto
+    // proceeding with the deactiviation
+    await this.authRepository.update(user.id, {
+      isDeleted: true,
     });
 
     return {
-      message: "Usuario actualizado correctamente"
-    };
+      messages: [
+        "Usuario desactivado exitosamente"
+      ]
+    }
   }
 
+  /**
+  * Activates an user account if it exists
+  */
+  async activateUser(email: string) {
+    // searching the target user
+    const user = await this.authRepository.findOne({
+      where: {
+        email: email.trim().toLowerCase(),
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('El usuario a reactivar no existe');
+    }
+
+    // proceeding with the deactiviation
+    await this.authRepository.update(user.id, {
+      isDeleted: false,
+    });
+
+    return {
+      messages: [
+        "Usuario activado exitosamente"
+      ]
+    }
+  }
 }

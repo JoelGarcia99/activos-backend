@@ -1,23 +1,30 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateUserDto } from './create-user.dto';
-import { IsOptional, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
+import { Transform } from 'class-transformer';
 
-export class UpdateAuthDto extends PartialType(CreateUserDto) {
-
+export class UpdateUserDto {
   @IsString()
   @IsOptional()
-  oldPassword: string
+  oldPassword: string;
 
-  @IsStrongPassword({
-    minLength: 8,
-    minNumbers: 1,
-    minSymbols: 1,
-    minUppercase: 1,
-    minLowercase: 1,
-  }, {
-    message: "La contraseña debe tener al menos 8 caracteres," +
-      " 1 número, 1 simbolo, 1 mayúscula y 1 minúscula"
+  @IsString({ message: "El nombre no es válido" })
+  @Transform((value) => value.value.trim())
+  @IsOptional()
+  name: string;
+
+  @IsString()
+  @Transform((value) => value.value.trim())
+  @IsOptional()
+  lastName?: string;
+
+  @IsEmail({}, { message: "El email no es válido" })
+  @Transform((value) => value.value.trim().toLowerCase())
+  @Length(10, 400, {
+    message: "El email debe tener entre 10 y 400 caracteres"
   })
+  @IsOptional()
+  email: string;
+
+  @IsString()
   @IsOptional()
   password: string;
 }

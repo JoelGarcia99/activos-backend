@@ -67,3 +67,14 @@ CREATE TABLE `Sesiones`(
   constraint `fk_user_id` foreign key (`user_id`) references `Usuarios`(`id`)
     on update cascade on delete cascade
 )engine=InnoDB;
+
+
+CREATE TABLE `Recovery` (
+  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `recovery_code` varchar(10),
+  `user_id` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  constraint `fk_recovery_user_id` foreign key (`user_id`) references `Usuarios`(`id`)
+    on update cascade on delete cascade
+)engine=InnoDB;

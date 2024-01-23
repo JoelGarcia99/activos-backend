@@ -11,6 +11,7 @@ import { SecurityUtil } from 'src/utils/security';
 import { JwtStrategy } from 'src/jwt/strategy';
 import { EnvValue } from 'src/environment/variables';
 import { MailUtil } from 'src/utils/mail';
+import { Recovery } from './entities/recovery.entity';
 
 const jwtRegistration = JwtModule.registerAsync({
   imports: [],
@@ -21,7 +22,7 @@ const jwtRegistration = JwtModule.registerAsync({
 });
 
 const typeOrmFeatures = TypeOrmModule.forFeature([
-  User, Session,
+  User, Session, Recovery,
 ]);
 
 @Module({
