@@ -6,7 +6,6 @@ export interface ResponseUtilOutput {
   accessToken: string;
 }
 
-@Injectable()
 export class ResponseBuilder {
 
   /**

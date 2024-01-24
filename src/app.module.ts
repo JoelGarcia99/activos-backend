@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './auth/auth.service';
 import { AppService } from './app.service';
 import { EnvValue } from './environment/variables';
+import { GroupsModule } from './groups/groups.module';
 
 export const typeOrmRootConfig = TypeOrmModule.forRoot({
   type: 'mysql',
@@ -28,6 +29,7 @@ export const typeOrmRootConfig = TypeOrmModule.forRoot({
       limit: 100,
     }]),
     AuthModule,
+    GroupsModule,
   ],
   providers: [
     AppService,

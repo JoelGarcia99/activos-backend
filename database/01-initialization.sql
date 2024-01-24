@@ -68,7 +68,6 @@ CREATE TABLE `Sesiones`(
     on update cascade on delete cascade
 )engine=InnoDB;
 
-
 CREATE TABLE `Recovery` (
   `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `recovery_code` varchar(10),
@@ -76,5 +75,13 @@ CREATE TABLE `Recovery` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   constraint `fk_recovery_user_id` foreign key (`user_id`) references `Usuarios`(`id`)
+    on update cascade on delete cascade
+)engine=InnoDB;
+
+CREATE TABLE `Subgrupo`(
+  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `nombre` varchar(100) NOT NULL,
+  `groupId` int NOT NULL,
+  constraint `fk_groupId` foreign key (`groupId`) references `gruposaf`(`id`)
     on update cascade on delete cascade
 )engine=InnoDB;

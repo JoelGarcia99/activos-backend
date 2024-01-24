@@ -42,8 +42,7 @@ export class AuthService {
   async loadUsers() {
     const admins = await this.authRepository.find({
       where: {
-        role: Not(Roles.ROOT),
-        isDeleted: false,
+        role: Not(Roles.ROOT)
       }
     });
 
@@ -154,7 +153,9 @@ export class AuthService {
       });
     } catch (e) {
       console.error(`${dayjs().format("DD/MM/YYYY HH:mm:ss")} | 💀\tError while registering user: `, e);
-      throw new BadRequestException([DbOutputProcessor.processError(e)]);
+      throw new BadRequestException([
+        DbOutputProcessor.processError(e, { entityName: 'Usuario' })
+      ]);
     }
 
     // mailing 
