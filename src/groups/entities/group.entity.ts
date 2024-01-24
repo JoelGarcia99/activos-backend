@@ -24,6 +24,6 @@ export class Group {
   @Column({ name: "codgrupo", type: "char", length: 3, default: "001" })
   groupCode: string;
 
-  @OneToMany(() => Subgroup, (subgroup) => subgroup.group, { eager: true })
+  @OneToMany(() => Subgroup, (subgroup) => subgroup.group, { eager: true, cascade: true })
   subgroups: Subgroup[];
 }

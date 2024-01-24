@@ -85,3 +85,8 @@ CREATE TABLE `Subgrupo`(
   constraint `fk_groupId` foreign key (`groupId`) references `gruposaf`(`id`)
     on update cascade on delete cascade
 )engine=InnoDB;
+
+-- adding foreign keys
+ALTER TABLE `productsaf`
+ADD CONSTRAINT `FK_PROD_SUBGROUP` FOREIGN KEY (`grupoafId`) REFERENCES `Usuarios` (`id`) 
+ON DELETE CASCADE ON UPDATE CASCADE;

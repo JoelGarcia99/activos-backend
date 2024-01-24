@@ -18,7 +18,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw err;
     }
 
-    console.log(straOutput);
     return straOutput;
   }
 }

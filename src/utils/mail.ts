@@ -37,8 +37,6 @@ export class MailUtil {
         from: process.env.SENDGRID_EMAIL
       });
 
-      console.log(outcome);
-      console.log(outcome?.body)
     } catch (e) {
       console.error(e);
     }

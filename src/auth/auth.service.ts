@@ -184,6 +184,11 @@ export class AuthService {
     // extracting the user ID from the session
     const { userId } = guardOutput;
 
+    console.log(Number(!!updateUserDto.oldPassword) + Number(!!updateUserDto.password))
+    if (Number(!!updateUserDto.oldPassword) + Number(!!updateUserDto.password) === 1) {
+      throw new BadRequestException(["Para actualizar contraseña debe proporcionar la antigua y la nueva"])
+    }
+
     // looking for the already registered user in the DB so I can remove the old
     // profile image if needed
     const dbUser = await this.authRepository.findOne({
@@ -196,8 +201,6 @@ export class AuthService {
 
     // deleting non needed fields
     const user = { ...updateUserDto }
-
-    console.log("User", user, updateUserDto)
 
     let newHashedPassword: string | undefined = undefined;
 
@@ -249,6 +252,26 @@ export class AuthService {
       ...dbUser,
       ...user,
     }
+  }
+
+  /***
+   * Checks if the user password matches the one in the DB
+   */
+  async checkPassword(
+    userId: number,
+    password: string,
+    user: User | null
+  ): Promise<boolean> {
+    let dbUser = user ?? await this.authRepository.findOne({
+      where: { id: userId, isDeleted: false },
+    });
+
+    if (!dbUser) {
+      return false;
+    }
+
+    const isMatch = argon2.verifySync(dbUser.password, password);
+    return isMatch;
   }
 
 

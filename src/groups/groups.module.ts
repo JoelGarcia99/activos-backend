@@ -16,6 +16,7 @@ const typeOrmFeatures = TypeOrmModule.forFeature([
   controllers: [GroupsController],
   providers: [
     GroupsService,
+    AuthService,
   ],
   imports: [
     AuthModule,
