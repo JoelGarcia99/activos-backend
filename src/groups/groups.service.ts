@@ -5,7 +5,7 @@ import { Group } from './entities/group.entity';
 import { Repository } from 'typeorm';
 import { randomInt } from 'crypto';
 import { DbOutputProcessor } from 'src/utils/processors/mysql.errors';
-import { DeleteGroupDto } from './dto/delete.dto';
+import { DeletionDto } from './dto/delete.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { Subgroup } from './entities/subgroup.entity';
@@ -29,6 +29,8 @@ export class GroupsService {
   async createWithSubgroups(createGroupDto: CreateGroupDto) {
     const group = this.groupRepository.create({
       // a three digits auto generated number
+      companySerial: '01',
+      sucursal: '01',
       groupCode: randomInt(999).toString().padStart(3, '0'),
       ...createGroupDto
     });
@@ -71,7 +73,7 @@ export class GroupsService {
   */
   async delete(
     userId: number,
-    deleteGroupDto: DeleteGroupDto,
+    deleteGroupDto: DeletionDto,
     groupId: number,
   ) {
     const passwordMatches = await this.authService.checkPassword(
@@ -143,7 +145,7 @@ export class GroupsService {
    */
   async deleteSubgroup(
     userId: number,
-    deleteGroupDto: DeleteGroupDto,
+    deleteGroupDto: DeletionDto,
     subgroupId: number
   ) {
     const passwordMatches = await this.authService.checkPassword(

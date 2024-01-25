@@ -1,6 +1,9 @@
 import { IsString } from "class-validator";
 
-export class DeleteGroupDto {
+/**
+ * WARNING: So far it's also being used for Departments, be aware of that
+ */
+export class DeletionDto {
   @IsString({ message: 'La contraseña es necesaria' })
   password: string;
 }
