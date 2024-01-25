@@ -1,14 +1,15 @@
-import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Group } from './entities/group.entity';
 import { Repository } from 'typeorm';
-import { randomBytes, randomInt } from 'crypto';
+import { randomInt } from 'crypto';
 import { DbOutputProcessor } from 'src/utils/processors/mysql.errors';
 import { DeleteGroupDto } from './dto/delete.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { Subgroup } from './entities/subgroup.entity';
+import { AddSubgroupDto } from './dto/add-subgroups.dto';
 
 @Injectable()
 export class GroupsService {
@@ -80,7 +81,7 @@ export class GroupsService {
     );
 
     if (!passwordMatches) {
-      throw new ForbiddenException('Contraseña incorrecta');
+      throw new ForbiddenException(['Contraseña incorrecta']);
     }
 
     await this.groupRepository.delete({
@@ -106,7 +107,7 @@ export class GroupsService {
     });
 
     if (!group) {
-      throw new BadRequestException(['El grupo no existe']);
+      throw new NotFoundException(['El grupo no existe']);
     }
 
     return await this.groupRepository.save({
@@ -128,12 +129,82 @@ export class GroupsService {
     });
 
     if (!subgroup) {
-      throw new BadRequestException(['El subgrupo no existe']);
+      throw new NotFoundException(['El subgrupo no existe']);
     }
 
     return await this.subgroupRepository.save({
       ...subgroup,
       ...updateGroupDto
     });
+  }
+
+  /**
+   *
+   */
+  async deleteSubgroup(
+    userId: number,
+    deleteGroupDto: DeleteGroupDto,
+    subgroupId: number
+  ) {
+    const passwordMatches = await this.authService.checkPassword(
+      userId,
+      deleteGroupDto.password,
+      null
+    );
+
+    if (!passwordMatches) {
+      throw new ForbiddenException(['Contraseña incorrecta']);
+    }
+
+    await this.subgroupRepository.delete({
+      id: subgroupId
+    });
+
+    return {
+      message: 'El subgrupo y sus activos han sido eliminados',
+    }
+  }
+
+
+  /**
+  *
+  */
+  async addSubgroups(addSubgroupsDto: AddSubgroupDto) {
+    // searching for the group to determine if it does exist
+    const group = await this.groupRepository.findOne({
+      where: { id: addSubgroupsDto.groupId }
+    });
+
+    if (!group) {
+      throw new NotFoundException(['El grupo no existe']);
+    }
+
+    // getting the subgroups and validating they are not repeated
+    const subgroups = addSubgroupsDto.subgroups;
+    const subgroupsSet = new Set(subgroups);
+
+    if (subgroupsSet.size < subgroups.length) {
+      throw new BadRequestException(['Algunos subgrupos están repetidos']);
+    }
+
+    const allSubgroupsSet = new Set([...group.subgroups, ...subgroups]);
+
+    if (allSubgroupsSet.size !== group.subgroups.length + subgroups.length) {
+      throw new BadRequestException(['Algunos subgrupos ya existen']);
+    }
+
+    // Transforming the subgroups to be readable by the groups and TypeORM
+    const subgroupsEntities = subgroups.map((subgroup) => {
+      return this.subgroupRepository.create({
+        ...subgroup,
+        groupId: addSubgroupsDto.groupId
+      });
+    });
+
+    await this.subgroupRepository.save(subgroupsEntities);
+
+    return {
+      message: 'Los subgrupos han sido actualizados'
+    };
   }
 }

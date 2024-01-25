@@ -6,6 +6,7 @@ import { ResponseBuilder } from 'src/utils/response/builder';
 import { JwtAuthGuard as JwtGuard } from 'src/auth/guards/auth.guard';
 import { DeleteGroupDto } from './dto/delete.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
+import { AddSubgroupDto } from './dto/add-subgroups.dto';
 
 @Controller('groups')
 export class GroupsController {
@@ -76,6 +77,29 @@ export class GroupsController {
         updateGroupDto,
         +id
       ),
+    );
+  }
+
+  @Delete('subgroup/:id')
+  @UseGuards(JwtGuard, AdminGuard)
+  async deleteSubgroup(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() deleteGroupDto: DeleteGroupDto
+  ) {
+    return await ResponseBuilder.build(
+      req, async (userId) => await this.groupsService.deleteSubgroup(+userId, deleteGroupDto, +id),
+    );
+  }
+
+  @Post('add-subgroups')
+  @UseGuards(JwtGuard, AdminGuard)
+  async addSubgroups(
+    @Req() req: Request,
+    @Body() addSubgroupsDto: AddSubgroupDto
+  ) {
+    return await ResponseBuilder.build(
+      req, async (_) => await this.groupsService.addSubgroups(addSubgroupsDto),
     );
   }
 }
