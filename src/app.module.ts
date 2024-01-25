@@ -8,6 +8,8 @@ import { AuthService } from './auth/auth.service';
 import { AppService } from './app.service';
 import { EnvValue } from './environment/variables';
 import { GroupsModule } from './groups/groups.module';
+import { DepartmentModule } from './department/department.module';
+import { ResponsibleModule } from './responsible/responsible.module';
 
 export const typeOrmRootConfig = TypeOrmModule.forRoot({
   type: 'mysql',
@@ -30,6 +32,8 @@ export const typeOrmRootConfig = TypeOrmModule.forRoot({
     }]),
     AuthModule,
     GroupsModule,
+    DepartmentModule,
+    ResponsibleModule,
   ],
   providers: [
     AppService,

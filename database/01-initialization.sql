@@ -52,7 +52,7 @@ CREATE TABLE `Usuarios`(
   `apellidos` varchar(100) NULL,
   `email` varchar(250) unique NOT NULL,
   `password` char(97) NOT NULL COMMENT 'Argon2i hashed password',
-  `rol` ENUM('root', 'admin', 'user') NOT NULL DEFAULT 'user',
+  `rol` ENUM('root', 'admin', 'supervisor') NOT NULL DEFAULT 'supervisor',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

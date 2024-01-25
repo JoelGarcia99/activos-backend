@@ -17,7 +17,7 @@ export class CreateUserDto {
   lastName?: string;
 
   @IsEnum(
-    [Roles.ADMIN, Roles.USER],
+    [Roles.ADMIN, Roles.SUPERVISOR],
     {
       message: "El rol solo puede ser admin o user"
     }
