@@ -11,8 +11,8 @@ CREATE TABLE `departamentos` (
 CREATE TABLE `gruposaf` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(250) NOT NULL COMMENT 'Name of the group',
-  `ctagasto` varchar(20) DEFAULT NULL COMMENT '[solo lectura] llenado por contable',
-  `ctaacum` varchar(20) DEFAULT NULL COMMENT '[solo lectura] llenado por contable',
+  `ctagasto` varchar(20) DEFAULT NULL, -- NOTE: Lo llena contable
+  `ctaacum` varchar(20) DEFAULT NULL, -- NOTE: Lo llena contable
   `empresa` char(2) DEFAULT '01',
   `sucursal` char(2) DEFAULT '01',
   `codgrupo` char(3) NOT NULL,
@@ -26,12 +26,12 @@ CREATE TABLE `productsaf` (
   `modelo` varchar(255) NOT NULL,
   `serie` varchar(150) NOT NULL,
   `price` decimal(12,2) NOT NULL DEFAULT '0.00',
-  `porcdep` decimal(12,2) NOT NULL, -- TODO: lo llena contable,
+  `porcdep` decimal(12,2) NOT NULL, -- NOTE: lo llena contable,
   -- `title` varchar(255) NOT NULL,
   `status` enum('ACTIVO','INACTIVO') NOT NULL DEFAULT 'ACTIVO',
   `fechac` date DEFAULT NULL COMMENT 'Fecha compra',
   `deletedAt` datetime(6) DEFAULT NULL,
-  `userId` int NOT NULL,
+  `userId` int NOT NULL, -- TODO: ask @Dario for responsible user
   `grupoafId` int NOT NULL,
   `departamentoId` int NOT NULL,
   PRIMARY KEY (`id`),
@@ -90,3 +90,9 @@ CREATE TABLE `Subgrupo`(
 ALTER TABLE `productsaf`
 ADD CONSTRAINT `FK_PROD_SUBGROUP` FOREIGN KEY (`grupoafId`) REFERENCES `Usuarios` (`id`) 
 ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE TABLE `Responsable`(
+  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `nombre` varchar(100) NOT NULL UNIQUE,
+  `isDeleted` tinyint(1) NOT NULL DEFAULT '0'
+)engine=InnoDB;
