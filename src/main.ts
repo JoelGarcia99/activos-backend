@@ -5,6 +5,8 @@ import { LoggerMiddleware } from './utils/logger';
 import { EnvValue } from './environment/variables';
 import { schema as envSchema } from './environment/initialization';
 import 'dotenv/config'
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import helmet from '@fastify/helmet';
 
 async function bootstrap() {
 
@@ -20,9 +22,16 @@ async function bootstrap() {
   // Initializing env variables with new values
   EnvValue.init(result.value);
 
-  const app = await NestFactory.create(AppModule);
+  // Using fastify as the defailt HTTP engine instead of Express for better performance
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter({ logger: true })
+  );
 
   app.use(new LoggerMiddleware().use);
+
+  // Protect app headers against common known vulnerabilities
+  await app.register(helmet);
 
   app.enableCors({
     origin: '*',
@@ -40,7 +49,7 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api');
-  await app.listen(EnvValue.API_PORT);
+  await app.listen(EnvValue.API_PORT, '0.0.0.0');
 }
 
 bootstrap();

@@ -86,13 +86,22 @@ CREATE TABLE `Subgrupo`(
     on update cascade on delete cascade
 )engine=InnoDB;
 
--- adding foreign keys
-ALTER TABLE `productsaf`
-ADD CONSTRAINT `FK_PROD_SUBGROUP` FOREIGN KEY (`grupoafId`) REFERENCES `Usuarios` (`id`) 
-ON DELETE CASCADE ON UPDATE CASCADE;
 
 CREATE TABLE `Responsable`(
   `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `nombre` varchar(100) NOT NULL UNIQUE,
   `isDeleted` tinyint(1) NOT NULL DEFAULT '0'
 )engine=InnoDB;
+
+-- adding foreign keys
+ALTER TABLE `productsaf`
+ADD CONSTRAINT `FK_PROD_SUBGROUP` FOREIGN KEY (`grupoafId`) REFERENCES `Subgrupo` (`id`) 
+ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `productsaf`
+ADD CONSTRAINT `FK_PROD_DEPART` FOREIGN KEY (`departamentoId`) REFERENCES `departamentos` (`id`) 
+ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `productsaf`
+ADD CONSTRAINT `FK_PROD_RESPONSIBLE` FOREIGN KEY (`userId`) REFERENCES `Responsable` (`id`) 
+ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException, Session } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Session as AuthSession } from './entities/session.entity';
@@ -184,7 +184,6 @@ export class AuthService {
     // extracting the user ID from the session
     const { userId } = guardOutput;
 
-    console.log(Number(!!updateUserDto.oldPassword) + Number(!!updateUserDto.password))
     if (Number(!!updateUserDto.oldPassword) + Number(!!updateUserDto.password) === 1) {
       throw new BadRequestException(["Para actualizar contraseña debe proporcionar la antigua y la nueva"])
     }
@@ -343,11 +342,8 @@ export class AuthService {
 
     // if it isn't don't send any email to save resources
     if (!user) {
-      console.log("No user found");
       return output;
     }
-
-    console.log("Recovering password for the user: ", user);
 
     // validating if the recovery code wasn't send in the last 5 minutes
     const lastRecovery = await this.recoveryRepository.find({

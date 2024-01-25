@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Asset } from "src/assets/entities/asset.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('Responsable')
 export class Responsible {
@@ -10,4 +11,7 @@ export class Responsible {
 
   @Column()
   isDeleted: boolean;
+
+  @OneToMany(() => Asset, (asset) => asset.responsible)
+  assets: Asset[];
 }

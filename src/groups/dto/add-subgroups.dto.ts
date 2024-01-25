@@ -1,5 +1,5 @@
 
-import { IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { IsNumber, IsOptional, ValidateNested } from "class-validator";
 import { CreateSubgroupDto } from "./create-subgroup.dto";
 import { Type } from "class-transformer";
 

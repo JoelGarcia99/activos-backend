@@ -26,7 +26,7 @@ export class MailUtil {
 
   async sendAccountCreationEmail(input: IMailCreationInput) {
     try {
-      let outcome = await sgMail.send({
+      await sgMail.send({
         templateId: "d-145a6b30f69b415da07574bde396f7ae",
         dynamicTemplateData: {
           email: input.to,

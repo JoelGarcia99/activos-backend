@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { schema as envSchema } from './environment/initialization';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,6 +8,7 @@ import { EnvValue } from './environment/variables';
 import { GroupsModule } from './groups/groups.module';
 import { DepartmentModule } from './department/department.module';
 import { ResponsibleModule } from './responsible/responsible.module';
+import { AssetsModule } from './assets/assets.module';
 
 export const typeOrmRootConfig = TypeOrmModule.forRoot({
   type: 'mysql',
@@ -34,6 +33,7 @@ export const typeOrmRootConfig = TypeOrmModule.forRoot({
     GroupsModule,
     DepartmentModule,
     ResponsibleModule,
+    AssetsModule,
   ],
   providers: [
     AppService,
