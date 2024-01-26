@@ -1,5 +1,6 @@
 import { Asset } from "src/assets/entities/asset.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Maintenance } from "src/maintenance/entities/maintenance.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('Responsable')
 export class Responsible {
@@ -14,4 +15,7 @@ export class Responsible {
 
   @OneToMany(() => Asset, (asset) => asset.responsible)
   assets: Asset[];
+
+  @OneToMany(() => Maintenance, (maintenance) => maintenance.responsible)
+  maintenances: Maintenance[];
 }

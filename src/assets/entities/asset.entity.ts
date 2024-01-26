@@ -3,6 +3,7 @@ import { Subgroup } from "src/groups/entities/subgroup.entity";
 import { Responsible } from "src/responsible/entities/responsible.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { AssetImage } from "./asset-images.entity";
+import { Maintenance } from "src/maintenance/entities/maintenance.entity";
 
 export enum AssetStatus {
   ACTIVE = 'ACTIVO',
@@ -68,4 +69,7 @@ export class Asset {
 
   @OneToMany(() => AssetImage, (image) => image.asset, { eager: true })
   images: AssetImage[]
+
+  @OneToMany(() => Maintenance, (maintenance) => maintenance.asset)
+  maintenances: Maintenance[]
 }

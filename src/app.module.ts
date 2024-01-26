@@ -9,6 +9,7 @@ import { GroupsModule } from './groups/groups.module';
 import { DepartmentModule } from './department/department.module';
 import { ResponsibleModule } from './responsible/responsible.module';
 import { AssetsModule } from './assets/assets.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 export const typeOrmRootConfig = TypeOrmModule.forRoot({
   type: 'mysql',
@@ -34,6 +35,7 @@ export const typeOrmRootConfig = TypeOrmModule.forRoot({
     DepartmentModule,
     ResponsibleModule,
     AssetsModule,
+    MaintenanceModule,
   ],
   providers: [
     AppService,

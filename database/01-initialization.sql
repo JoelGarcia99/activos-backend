@@ -86,12 +86,25 @@ CREATE TABLE `Subgrupo`(
     on update cascade on delete cascade
 )engine=InnoDB;
 
-
 CREATE TABLE `Responsable`(
   `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `nombre` varchar(100) NOT NULL UNIQUE,
   `isDeleted` tinyint(1) NOT NULL DEFAULT '0'
 )engine=InnoDB;
+
+CREATE TABLE `Mantenimiento`(
+  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `motivo` enum('PREVENTIVO', 'CORRECTIVO', 'PREVENTIVO Y CORRECTIVO') NOT NULL,
+  `descripcion` text NULL,
+  `responsableId` int NOT NULL,
+  `fecha_solicitud` date NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  constraint `fk_mantenimiento_responsableId` foreign key (`responsableId`) references `Responsable`(`id`)
+    on update cascade on delete no action
+)engine=InnoDB;
+
+-- creating missing fields 
+ALTER TABLE `productsaf` ADD COLUMN `responsableId` int NULL AFTER `userId`;
+ALTER TABLE `Mantenimiento` ADD COLUMN `productafId` int NULL AFTER `responsableId`;
 
 -- adding foreign keys
 ALTER TABLE `productsaf`
@@ -106,5 +119,3 @@ ALTER TABLE `productsaf`
 ADD CONSTRAINT `FK_PROD_RESPONSIBLE` FOREIGN KEY (`responsableId`) REFERENCES `Responsable` (`id`) 
 ON DELETE CASCADE ON UPDATE CASCADE;
 
--- creating missing fields 
-ALTER TABLE `productsaf` ADD COLUMN `responsableId` int NULL AFTER `userId`;
