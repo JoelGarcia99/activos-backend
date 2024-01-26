@@ -25,13 +25,20 @@ export class AssetsService {
   * Creates & link a new asset to an existing department, responsible user, and subgroup.
   * It'll raise a DB exception if any of those relations doesn't exist.
   *
+  * @param {number} userId
+  * The ID of the user which is in session and the one who created the current asset 
+  *
   * @param {CreateAssetDto} createAssetDto
   * It doesn't make any validation over the file, that's the work of the controller, it 
   * just take and store them
   */
-  async create(createAssetDto: CreateAssetDto) {
+  async create(userId: number, createAssetDto: CreateAssetDto) {
     try {
-      const newAsset = this.assetRepository.create(createAssetDto);
+      const newAsset = this.assetRepository.create({
+        ...createAssetDto,
+        creatorId: userId,
+      });
+      console.log(newAsset);
       return await this.assetRepository.save(newAsset);
     } catch (error) {
       console.error(error);

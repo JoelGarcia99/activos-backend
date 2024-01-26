@@ -39,6 +39,9 @@ export class Asset {
   deletedAt?: Date;
 
   @Column({ name: 'userId' })
+  creatorId: number;
+
+  @Column({ name: 'responsableId' })
   responsibleId: number;
 
   @Column({ name: 'grupoafId' })
@@ -56,7 +59,7 @@ export class Asset {
   department: Department;
 
   @ManyToOne(() => Responsible, (responsible) => responsible.assets, { eager: true })
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'responsableId' })
   responsible: Responsible;
 
   @ManyToOne(() => Subgroup, (subgroup) => subgroup.assets, { eager: true })

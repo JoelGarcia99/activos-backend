@@ -11,7 +11,8 @@ import {
   BadRequestException,
   UploadedFiles,
   Res,
-  NotFoundException
+  NotFoundException,
+  Req
 } from '@nestjs/common';
 import { AssetsService } from './assets.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
@@ -19,6 +20,7 @@ import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { FilesFastifyInterceptor } from 'fastify-file-interceptor';
 import { UpdateAssetDto } from './dto/update-asset.dto';
+import { JwtStrategyOutput } from 'src/jwt/strategy';
 
 @Controller('assets')
 export class AssetsController {
@@ -42,6 +44,7 @@ export class AssetsController {
     }
   }))
   async create(
+    @Req() req,
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Body() createAssetDto: CreateAssetDto
   ) {
@@ -50,7 +53,9 @@ export class AssetsController {
       throw new BadRequestException(['No se pueden subir mas de 5 archivos']);
     }
 
-    const createdAsset = await this.assetsService.create(createAssetDto);
+    const { userId } = req['user'] as JwtStrategyOutput;
+
+    const createdAsset = await this.assetsService.create(userId, createAssetDto);
 
     // uploading files and linking it to the created asset
     const uplaodedFiles = await this.assetsService.uploadFiles(createdAsset.id, files);

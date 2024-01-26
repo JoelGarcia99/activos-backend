@@ -19,7 +19,7 @@ export class ResponsibleService {
   async create(createGroupDto: CreateGroupDto) {
 
     // verifying the existence of the responsible
-    const responsible = await this.responsibleRepository.findOne({
+    const dbResponsible = await this.responsibleRepository.findOne({
       where: {
         name: createGroupDto.name,
         isDeleted: true,
@@ -27,16 +27,16 @@ export class ResponsibleService {
     });
 
     // if the responsible was previously deleted then just reactivate it
-    if (responsible) {
-      responsible.isDeleted = false;
-      return await this.responsibleRepository.save(responsible);
+    if (dbResponsible) {
+      dbResponsible.isDeleted = false;
+      return await this.responsibleRepository.save(dbResponsible);
     }
 
     // if it's not delted then continue with the normal flow of creation & validation of 
     // unique name contraint
-    const department = this.responsibleRepository.create(createGroupDto);
+    const createdResponsible = this.responsibleRepository.create(createGroupDto);
     try {
-      return await this.responsibleRepository.save(department);
+      return await this.responsibleRepository.save(createdResponsible);
     } catch (error) {
       throw new BadRequestException([DbOutputProcessor.processError(error, {
         entityName: 'Responsable'
