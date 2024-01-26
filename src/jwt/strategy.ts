@@ -104,6 +104,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
         // renewing the access token
         accessToken = newAT;
+        // FIXME:
+        console.log("Renewed AT: ", newAT);
       }
       else if (!atValidation.isValid) {
         throw new UnauthorizedException("El token no es válido");
@@ -129,6 +131,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw e;
     }
 
+    //FIXME:
+    console.log("AT: ", accessToken);
     return {
       rtId,
       userId,

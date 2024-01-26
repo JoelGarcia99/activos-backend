@@ -18,9 +18,9 @@ export class ErrorInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((err) => {
         return throwError(() => new HttpException({
-          error: err.response,
+          error: err.response ?? err?.message ?? err,
           accessToken: jwtStrategy.accessToken
-        }, err.status));
+        }, err.status ?? 500));
       })
     );
   }

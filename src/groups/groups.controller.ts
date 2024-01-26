@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Delete, Param, Patch, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Delete, Param, Patch } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { AdminGuard } from 'src/auth/guards/admin.guard';

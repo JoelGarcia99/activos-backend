@@ -9,6 +9,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import helmet from '@fastify/helmet';
 import { TokenInterceptor } from './utils/interceptors/response.interceptor';
 import { ErrorInterceptor } from './utils/interceptors/error.interceptor';
+import { contentParser } from 'fastify-file-interceptor';
 
 async function bootstrap() {
 
@@ -27,7 +28,7 @@ async function bootstrap() {
   // Using fastify as the defailt HTTP engine instead of Express for better performance
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter({ logger: true })
+    new FastifyAdapter({ logger: true }),
   );
 
   app.use(new LoggerMiddleware().use);
@@ -36,7 +37,7 @@ async function bootstrap() {
 
   // Protect app headers against common known vulnerabilities
   await app.register(helmet);
-  await app.register(require('@fastify/multipart'));
+  await app.register(contentParser);
 
   app.enableCors({
     origin: '*',
