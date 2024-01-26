@@ -77,6 +77,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
           throw new UnauthorizedException("Su sesión ya no es válida");
         }
 
+        // removing the old session data 
+        await this.sessionRepository.delete({
+          id: rtId,
+        });
+
         const currentRT = session.refreshToken;
 
         // validating the token isn't expired or something

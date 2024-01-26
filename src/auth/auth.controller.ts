@@ -1,7 +1,6 @@
-import { Controller, Get, Body, Param, UseGuards, Post, Request, Patch } from '@nestjs/common';
+import { Controller, Get, Body, Param, UseGuards, Post, Request, Patch, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/auth.guard';
-import { ResponseBuilder } from 'src/utils/response/builder';
 import { RootGuard } from './guards/root.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
@@ -29,13 +28,8 @@ export class AuthController {
    */
   @Get('/users')
   @UseGuards(JwtAuthGuard, RootGuard)
-  async listUsers(
-    @Request() request: Request
-  ) {
-    return ResponseBuilder.build(
-      request,
-      async (_) => await this.authService.loadUsers(),
-    );
+  async listUsers() {
+    return await this.authService.loadUsers();
   }
 
   /**
@@ -44,15 +38,9 @@ export class AuthController {
   @Post('/register')
   @UseGuards(JwtAuthGuard, RootGuard)
   async register(
-    @Request() request: Request,
     @Body() createUserDto: CreateUserDto
   ) {
-
-    console.log(`INFO: Root user is trying to register a new user with role ${createUserDto.role}`);
-    return ResponseBuilder.build(
-      request,
-      async (_) => await this.authService.register(createUserDto),
-    );
+    return await this.authService.register(createUserDto)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -89,30 +77,14 @@ export class AuthController {
 
   @Post('deactivate-user/:email')
   @UseGuards(JwtAuthGuard, RootGuard)
-  async deactivateUser(
-    @Request() req: Request,
-    @Param('email') email: string
-  ) {
-    const { accessToken } = req['user'] as JwtStrategyOutput;
-
-    return {
-      data: await this.authService.deactivateUser(email),
-      accessToken,
-    }
+  async deactivateUser(@Param('email') email: string) {
+    return await this.authService.deactivateUser(email);
   }
 
   @Post('activate-user/:email')
   @UseGuards(JwtAuthGuard, RootGuard)
-  async activateUser(
-    @Request() req: Request,
-    @Param('email') email: string
-  ) {
-    const { accessToken } = req['user'] as JwtStrategyOutput;
-
-    return {
-      data: await this.authService.activateUser(email),
-      accessToken,
-    }
+  async activateUser(@Param('email') email: string) {
+    return await this.authService.activateUser(email);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -123,10 +95,6 @@ export class AuthController {
   ) {
     const guardOutput = req['user'] as JwtStrategyOutput;
 
-    return {
-      data: await this.authService.updateUser(guardOutput, body),
-      accessToken: guardOutput.accessToken,
-    }
+    return await this.authService.updateUser(guardOutput, body);
   }
-
 }

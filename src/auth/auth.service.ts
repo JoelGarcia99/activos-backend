@@ -295,10 +295,7 @@ export class AuthService {
 
     delete user.password;
 
-    return {
-      user,
-      accessToken: guardOutput.accessToken,
-    };
+    return user;
   }
 
   /**

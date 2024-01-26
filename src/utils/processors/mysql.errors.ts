@@ -16,11 +16,14 @@ export class DbOutputProcessor {
 
     switch (err.code) {
       case "ER_DUP_ENTRY":
-        error = this.getKeyNameFromErrorMessage(sqlMessage, {
+        error = this.extractDuplicatedKeyMessage(sqlMessage, {
           idenfifier,
           article,
           entityName
         });
+        break;
+      case "ER_NO_REFERENCED_ROW_2":
+        error = this.extractForeignKeyMessage(sqlMessage);
         break;
       // TODO: cover more cases
       default:
@@ -29,6 +32,27 @@ export class DbOutputProcessor {
 
     return error;
   }
+
+  /**
+   *
+   *
+   */
+  static extractForeignKeyMessage(message: string): string {
+    // Extract the relevant part of the message using regular expressions.
+    const match = message.match(/FOREIGN KEY \(`.*`\) REFERENCES `(.*?)` \(`id`\)/i);
+
+    if (match) {
+      // Extract the entity name from the match.
+      const entityName = match[1];
+
+      // Construct the processed message using the extracted entity name.
+      return `No existe ningún registro en la tabla ${entityName} con el id proporcionado.`;
+    } else {
+      // For other errors, return a generic message.
+      return message;
+    }
+  }
+
 
 
   /**
@@ -40,7 +64,7 @@ export class DbOutputProcessor {
   * @param {stirng} errorMessage
   * This must be a [sqlMessage] format string, otherwise the whole string is returned.
   */
-  private static getKeyNameFromErrorMessage(
+  private static extractDuplicatedKeyMessage(
     errorMessage: string,
     options: IErrorMessage
   ): string {

@@ -7,6 +7,8 @@ import { schema as envSchema } from './environment/initialization';
 import 'dotenv/config'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import helmet from '@fastify/helmet';
+import { TokenInterceptor } from './utils/interceptors/response.interceptor';
+import { ErrorInterceptor } from './utils/interceptors/error.interceptor';
 
 async function bootstrap() {
 
@@ -29,9 +31,12 @@ async function bootstrap() {
   );
 
   app.use(new LoggerMiddleware().use);
+  app.useGlobalInterceptors(new TokenInterceptor());
+  app.useGlobalInterceptors(new ErrorInterceptor());
 
   // Protect app headers against common known vulnerabilities
   await app.register(helmet);
+  await app.register(require('@fastify/multipart'));
 
   app.enableCors({
     origin: '*',

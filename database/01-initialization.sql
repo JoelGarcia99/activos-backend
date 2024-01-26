@@ -31,7 +31,8 @@ CREATE TABLE `productsaf` (
   `status` enum('ACTIVO','INACTIVO') NOT NULL DEFAULT 'ACTIVO',
   `fechac` date DEFAULT NULL COMMENT 'Fecha compra',
   `deletedAt` datetime(6) DEFAULT NULL,
-  `userId` int NOT NULL, -- TODO: ask @Dario for responsible user
+  `userId` int NOT NULL, -- FIXME: quien creo el activo
+  -- TODO: crear campo para responsable
   `grupoafId` int NOT NULL,
   `departamentoId` int NOT NULL,
   PRIMARY KEY (`id`),
@@ -105,3 +106,6 @@ ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `productsaf`
 ADD CONSTRAINT `FK_PROD_RESPONSIBLE` FOREIGN KEY (`userId`) REFERENCES `Responsable` (`id`) 
 ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- creating missing fields 
+ALTER TABLE `productsaf` ADD COLUMN `responsableId` int NULL AFTER `userId`;
