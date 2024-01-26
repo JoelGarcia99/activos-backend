@@ -32,7 +32,6 @@ CREATE TABLE `productsaf` (
   `fechac` date DEFAULT NULL COMMENT 'Fecha compra',
   `deletedAt` datetime(6) DEFAULT NULL,
   `userId` int NOT NULL,
-  -- TODO: crear campo para responsable
   `grupoafId` int NOT NULL,
   `departamentoId` int NOT NULL,
   PRIMARY KEY (`id`),

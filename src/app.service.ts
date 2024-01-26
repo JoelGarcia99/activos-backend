@@ -36,7 +36,7 @@ export class AppService {
       console.log("Root user not found, creating a new one... ✨");
       const user = new User();
       user.name = "Root";
-      user.email = "soporteerpzc@gmail.com"; // TODO: ask @Dario
+      user.email = "soporteerpzc@gmail.com";
 
       // NOTE: At this point 2024-22-01 it uses Argon2id algorithm for hashing.
       // Keep it in mind

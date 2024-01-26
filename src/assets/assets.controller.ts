@@ -44,7 +44,7 @@ export class AssetsController {
     }
   }))
   async create(
-    @Req() req,
+    @Req() req: Request,
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Body() createAssetDto: CreateAssetDto
   ) {

@@ -66,8 +66,6 @@ export class TokensService {
       },
     );
 
-    // FIXME:
-    console.log("AT: ", accessToken);
     return accessToken;
   }
 
