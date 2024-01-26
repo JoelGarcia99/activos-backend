@@ -16,23 +16,15 @@ export class MaintenanceController {
     return await this.maintenanceService.create(createMaintenanceDto);
   }
 
-  @Get()
-  findAll() {
-    return this.maintenanceService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.maintenanceService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMaintenanceDto: UpdateMaintenanceDto) {
-    return this.maintenanceService.update(+id, updateMaintenanceDto);
+  @Get('/asset/:id')
+  async findByAsset(
+    @Param('id') id: string
+  ) {
+    return await this.maintenanceService.findByAsset(+id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.maintenanceService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.maintenanceService.remove(+id);
   }
 }

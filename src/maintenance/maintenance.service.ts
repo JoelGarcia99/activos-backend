@@ -58,19 +58,36 @@ export class MaintenanceService {
     }
   }
 
-  findAll() {
-    return `This action returns all maintenance`;
+  /**
+   *
+   */
+  async remove(id: number) {
+    const maintenance = await this.maintenanceRepository.findOne({
+      where: {
+        id
+      }
+    });
+
+    if (!maintenance) {
+      throw new NotFoundException(['Mantenimiento no encontrado']);
+    }
+
+    await this.maintenanceRepository.remove(maintenance);
+
+    return {
+      message: 'Mantenimiento eliminado',
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} maintenance`;
-  }
 
-  update(id: number, updateMaintenanceDto: UpdateMaintenanceDto) {
-    return `This action updates a #${id} maintenance`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} maintenance`;
+  /**
+  *
+  */
+  async findByAsset(assetId: number) {
+    return await this.maintenanceRepository.find({
+      where: {
+        assetId
+      }
+    });
   }
 }
