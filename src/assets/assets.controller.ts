@@ -1,23 +1,42 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Patch, Param, Delete, PipeTransform, UploadedFile, UseInterceptors, BadRequestException, UploadedFiles } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  BadRequestException,
+  UploadedFiles,
+  Res,
+  NotFoundException
+} from '@nestjs/common';
 import { AssetsService } from './assets.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { FileFastifyInterceptor, FilesFastifyInterceptor } from 'fastify-file-interceptor';
+import { FilesFastifyInterceptor } from 'fastify-file-interceptor';
+import { UpdateAssetDto } from './dto/update-asset.dto';
 
 @Controller('assets')
-@UseGuards(JwtAuthGuard)
 export class AssetsController {
   constructor(private readonly assetsService: AssetsService) { }
 
   @Post()
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @UseInterceptors(FilesFastifyInterceptor('images', null, {
     fileFilter: (_, file: Express.Multer.File, callback) => {
       if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
         return callback(new BadRequestException([
           'Solo imagenes JPG, JPEG, PNG, GIF o WEBP son permitidas',
         ]));
+      }
+
+      // max file size is 5 MB 
+      if (file.size > 5 * 1024 * 1024) {
+        return callback(new BadRequestException(['El archivo es demasiado grande']));
       }
       callback(null, true);
     }
@@ -34,33 +53,93 @@ export class AssetsController {
     const createdAsset = await this.assetsService.create(createAssetDto);
 
     // uploading files and linking it to the created asset
-    await this.assetsService.uploadFiles(createdAsset.id, files);
+    const uplaodedFiles = await this.assetsService.uploadFiles(createdAsset.id, files);
+    createdAsset.images = uplaodedFiles;
 
-    return {
-      asset: createdAsset,
-      files: files.length
-    }
+    return createdAsset;
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async list() {
     return await this.assetsService.list();
   }
 
   @Patch(':id')
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async update(
-    @Body() updateAssetDto: CreateAssetDto,
+    @Body() updateAssetDto: UpdateAssetDto,
     @Param('id') id: string
   ) {
     return await this.assetsService.update(+id, updateAssetDto);
   }
 
   @Delete(':id')
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async delete(
     @Param('id') id: string
   ) {
     return await this.assetsService.delete(+id);
+  }
+
+  @Get('images/:path')
+  async loadImage(
+    @Res() res: any,
+    @Param('path') path: string
+  ) {
+    const file = await this.assetsService.loadImage(path);
+
+    if (!file) {
+      throw new NotFoundException(['No se encontro el archivo']);
+    }
+
+    res.type(`image/${path.split('.').pop()}`).send(file);
+  }
+
+  @Delete('images/:imageId')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  async deleteImage(
+    @Param('imageId') imageId: string
+  ) {
+    return await this.assetsService.deleteImage(+imageId);
+  }
+
+  @Post('add-image/:id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(FilesFastifyInterceptor('images', null, {
+    fileFilter: (_, file: Express.Multer.File, callback) => {
+      if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+        return callback(new BadRequestException([
+          'Solo imagenes JPG, JPEG, PNG, GIF o WEBP son permitidas',
+        ]));
+      }
+
+      // max file size is 5 MB 
+      if (file.size > 5 * 1024 * 1024) {
+        return callback(new BadRequestException(['El archivo es demasiado grande']));
+      }
+      callback(null, true);
+    }
+  }))
+  async addImage(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Param('id') id: string
+  ) {
+    const asset = await this.assetsService.getAssetById(+id);
+
+    if (!asset) {
+      throw new NotFoundException(['No se encontro el activo']);
+    }
+
+    // validating the asset could have up to five files 
+    if (asset.images.length + files.length > 5) {
+      throw new BadRequestException(['El activo no puede tener más de 5 imagenes']);
+    }
+
+    await this.assetsService.uploadFiles(+id, files);
+
+    return {
+      message: 'Imagenes agregadas',
+    }
   }
 }

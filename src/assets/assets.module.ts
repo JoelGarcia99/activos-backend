@@ -4,9 +4,10 @@ import { AssetsController } from './assets.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Asset } from './entities/asset.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { AssetImage } from './entities/asset-images.entity';
 
 const typeOrmSettings = TypeOrmModule.forFeature([
-  Asset,
+  Asset, AssetImage,
 ])
 
 @Module({

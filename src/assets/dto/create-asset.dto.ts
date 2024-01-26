@@ -1,7 +1,6 @@
-import { IsAlphanumeric, IsDateString, IsEnum, IsNumber, IsOptional, IsString, Validate } from "class-validator";
+import { IsDateString, IsEnum, IsOptional, IsString } from "class-validator";
 import { AssetStatus } from "../entities/asset.entity";
 import { Transform } from "class-transformer";
-import { isFloat32Array } from "util/types";
 
 export class CreateAssetDto {
   @IsString({ message: "El nombre del activo es necesario" })

@@ -1,7 +1,8 @@
 import { Department } from "src/department/entities/department.entity";
 import { Subgroup } from "src/groups/entities/subgroup.entity";
 import { Responsible } from "src/responsible/entities/responsible.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { AssetImage } from "./asset-images.entity";
 
 export enum AssetStatus {
   ACTIVE = 'ACTIVO',
@@ -61,4 +62,7 @@ export class Asset {
   @ManyToOne(() => Subgroup, (subgroup) => subgroup.assets, { eager: true })
   @JoinColumn({ name: 'grupoafId' })
   subgroup: Subgroup;
+
+  @OneToMany(() => AssetImage, (image) => image.asset, { eager: true })
+  images: AssetImage[]
 }
