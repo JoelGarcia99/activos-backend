@@ -94,13 +94,24 @@ export class GroupsService {
       throw new ForbiddenException(['Contraseña incorrecta']);
     }
 
-    await this.groupRepository.delete({
-      id: groupId
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
     });
 
-    return {
-      message: 'El grupo, subgrupos, y activos han sido eliminados',
+    if (!group) {
+      throw new NotFoundException(['El grupo no existe']);
     }
+
+    // if the group has associated subgroups then don't allow deletion 
+    if (group.subgroups.length > 0) {
+      throw new BadRequestException(['No se puede eliminar el grupo porque tiene subgrupos asociados']);
+    }
+
+    await this.groupRepository.remove(group);
+
+    return {
+      message: 'El grupo ha sido eliminado',
+    };
   }
 
 
@@ -166,12 +177,24 @@ export class GroupsService {
       throw new ForbiddenException(['Contraseña incorrecta']);
     }
 
-    await this.subgroupRepository.delete({
-      id: subgroupId
+    // verifying the subgroup is empty
+    const subgroup = await this.subgroupRepository.findOne({
+      where: { id: subgroupId },
+      relations: ['assets']
     });
 
+    if (!subgroup) {
+      throw new NotFoundException(['El subgrupo no existe']);
+    }
+
+    if (subgroup.assets.length > 0) {
+      throw new BadRequestException(['No se puede eliminar el subgrupo porque tiene activos asociados']);
+    }
+
+    await this.subgroupRepository.remove(subgroup);
+
     return {
-      message: 'El subgrupo y sus activos han sido eliminados',
+      message: 'El subgrupo ha sido eliminado',
     }
   }
 
