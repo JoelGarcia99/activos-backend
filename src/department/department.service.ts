@@ -40,8 +40,14 @@ export class DepartmentService {
   /**
    *
    */
-  async list() {
-    return await this.departmentRepository.find();
+  async list(
+    page: number,
+    limit: number = 10
+  ) {
+    return await this.departmentRepository.find({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
   /**

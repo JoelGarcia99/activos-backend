@@ -12,7 +12,8 @@ import {
   UploadedFiles,
   Res,
   NotFoundException,
-  Req
+  Req,
+  Query
 } from '@nestjs/common';
 import { AssetsService } from './assets.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
@@ -66,8 +67,14 @@ export class AssetsController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async list() {
-    return await this.assetsService.list();
+  async list(
+    @Query('page') page: number,
+    @Query('limit') limit: number
+  ) {
+    return await this.assetsService.list(
+      +(page ?? 1),
+      +(limit ?? 10)
+    );
   }
 
   @Patch(':id')

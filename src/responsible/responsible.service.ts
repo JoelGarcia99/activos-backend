@@ -80,11 +80,16 @@ export class ResponsibleService {
   /**
   *
   */
-  async list() {
+  async list(
+    page: number,
+    limit: number = 10
+  ) {
     return await this.responsibleRepository.find({
       where: {
         isDeleted: false
-      }
+      },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ResponsibleService } from './responsible.service';
 import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
@@ -25,8 +25,14 @@ export class ResponsibleController {
   }
 
   @Get('/')
-  async list() {
-    return await this.responsibleService.list();
+  async list(
+    @Query('page') page: number,
+    @Query('limit') limit: number
+  ) {
+    return await this.responsibleService.list(
+      +(page ?? 1),
+      +(limit ?? 10)
+    );
   }
 
   @Delete(':id')

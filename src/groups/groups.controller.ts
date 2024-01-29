@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Delete, Param, Patch } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Delete, Param, Patch, Query } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
@@ -30,8 +30,14 @@ export class GroupsController {
   * gonna grow very much as to cause performance issues.
   */
   @Get()
-  async list() {
-    return await this.groupsService.list();
+  async list(
+    @Query('page') page: number,
+    @Query('limit') limit: number
+  ) {
+    return await this.groupsService.list(
+      +(page ?? 1),
+      +(limit ?? 10)
+    );
   }
 
   @Delete(':id')

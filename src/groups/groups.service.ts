@@ -62,8 +62,16 @@ export class GroupsService {
    * Lists all the groups with eager subgroups loading.
    * NOTE: it doesn't implement pagination since it's not required
    */
-  async list() {
-    return await this.groupRepository.find();
+  async list(
+    page: number,
+    limit: number
+  ) {
+    return await this.groupRepository.find(
+      {
+        skip: (page - 1) * limit,
+        take: limit
+      }
+    );
   }
 
 

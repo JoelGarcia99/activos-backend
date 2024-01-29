@@ -38,7 +38,6 @@ export class AssetsService {
         ...createAssetDto,
         creatorId: userId,
       });
-      console.log(newAsset);
       return await this.assetRepository.save(newAsset);
     } catch (error) {
       console.error(error);
@@ -84,11 +83,13 @@ export class AssetsService {
    *
    *
    */
-  async list() {
+  async list(page: number, limit: number = 10) {
     return await this.assetRepository.find({
       where: {
         deletedAt: IsNull(),
-      }
+      },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 

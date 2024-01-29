@@ -83,11 +83,17 @@ export class MaintenanceService {
   /**
   *
   */
-  async findByAsset(assetId: number) {
+  async findByAsset(
+    assetId: number,
+    page: number = 1,
+    limit: number = 10,
+  ) {
     return await this.maintenanceRepository.find({
       where: {
         assetId
-      }
+      },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 }

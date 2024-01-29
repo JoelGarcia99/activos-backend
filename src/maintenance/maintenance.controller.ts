@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
@@ -18,9 +18,15 @@ export class MaintenanceController {
 
   @Get('/asset/:id')
   async findByAsset(
-    @Param('id') id: string
+    @Param('id') id: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number
   ) {
-    return await this.maintenanceService.findByAsset(+id);
+    return await this.maintenanceService.findByAsset(
+      +id,
+      +(page ?? 1),
+      +(limit ?? 10)
+    );
   }
 
   @Delete(':id')

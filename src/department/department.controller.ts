@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
@@ -18,8 +18,14 @@ export class DepartmentController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async list() {
-    return await this.departmentService.list();
+  async list(
+    @Query('page') page: number,
+    @Query('limit') limit: number
+  ) {
+    return await this.departmentService.list(
+      +(page ?? 1),
+      +(limit ?? 10)
+    );
   }
 
   @Patch(':id')
