@@ -24,6 +24,7 @@ import { UpdateAssetDto } from './dto/update-asset.dto';
 import { JwtStrategyOutput } from 'src/jwt/strategy';
 
 @Controller('assets')
+// NOTE: There are some endpoints without session, so don't add any guards here
 export class AssetsController {
   constructor(private readonly assetsService: AssetsService) { }
 
@@ -76,6 +77,26 @@ export class AssetsController {
       +(limit ?? 10)
     );
   }
+
+  @Get('search')
+  @UseGuards(JwtAuthGuard)
+  async search(
+    @Query('q') q: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number
+  ) {
+
+    if (!q || q.length < 3) {
+      throw new BadRequestException(['La busqueda debe ser mayor o igual a 3 caracteres']);
+    }
+
+    return await this.assetsService.search(
+      q,
+      +(page ?? 1),
+      +(limit ?? 10)
+    );
+  }
+
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)

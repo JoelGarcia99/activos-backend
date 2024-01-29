@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Asset } from './entities/asset.entity';
-import { IsNull, Repository } from 'typeorm';
+import { ILike, IsNull, Raw, Repository } from 'typeorm';
 import { DbOutputProcessor } from 'src/utils/processors/mysql.errors';
 import * as fs from 'fs';
 import { IMAGE_STORAGE_LOCATION, STORAGE_LOCATION } from 'src/utils/storage';
@@ -188,6 +188,26 @@ export class AssetsService {
         id,
         deletedAt: IsNull(),
       }
+    });
+  }
+
+  /**
+   *
+   */
+  async search(q: string, page: number, limit: number) {
+    return await this.assetRepository.find({
+      where: [
+        {
+          name: Raw(name => `UPPER(${name}) LIKE '%${q.toUpperCase()}%'`),
+          deletedAt: IsNull(),
+        },
+        {
+          model: Raw(description => `UPPER(${description}) LIKE '%${q.toUpperCase()}%'`),
+          deletedAt: IsNull(),
+        }
+      ],
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 }
