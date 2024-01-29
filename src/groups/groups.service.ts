@@ -131,10 +131,74 @@ export class GroupsService {
       throw new NotFoundException(['El grupo no existe']);
     }
 
-    return await this.groupRepository.save({
-      ...group,
-      ...updateGroupDto
+    // updating the group name if needed 
+    if (updateGroupDto.name) {
+      group.name = updateGroupDto.name;
+      await this.groupRepository.save(group);
+    }
+
+    // getting all the subgroups to determine which ones needs update 
+    const dbSubgroups = group.subgroups;
+    const subgroups = updateGroupDto.subgroups ?? [];
+    const repeatedNames = new Set([
+      ...dbSubgroups.map(subgroup => subgroup.name),
+    ]);
+    const subgroupsToAdd: AddSubgroupDto[] = [];
+
+    // getting all the susbgroups with ID since they must be updated and no agregated 
+    const subgroupsToUpdate = subgroups.filter(subgroup => {
+
+      // if the subgroup is present in DB without any changes then avoid it 
+      if (dbSubgroups.find(dbSubgroup => dbSubgroup.id === subgroup.id && subgroup.name === dbSubgroup.name)) {
+        return false;
+      }
+
+      // verifying if the name is repeated 
+      if (repeatedNames.has(subgroup.name)) {
+        console.log("eeeeexxxx\n\n\n\n");
+        throw new BadRequestException([`El subgrupo ${subgroup.name} está repetido`]);
+      }
+      else {
+        repeatedNames.add(subgroup.name);
+      }
+
+      // only returning subgroups with ID and that its ID is present on 
+      // the DB 
+      const outcome = (subgroup.id && dbSubgroups.find(dbSubgroup => dbSubgroup.id === subgroup.id));
+
+      if (outcome) {
+        return true;
+      }
+
+      // preparing the subgroup to be added to DB
+      subgroupsToAdd.push({
+        name: subgroup.name,
+        groupId: groupId
+      } as AddSubgroupDto);
+      return false;
     });
+
+    // starting a transaction to perform both operations update & add 
+    await this.subgroupRepository.manager.transaction(async (transactionalEntityManager) => {
+      // updating the subgroups
+      if (subgroupsToUpdate.length > 0) {
+        await transactionalEntityManager.save(subgroupsToUpdate.map((x) => {
+          return this.subgroupRepository.create(x);
+        }));
+      }
+
+      // adding the subgroups
+      if (subgroupsToAdd.length > 0) {
+        await transactionalEntityManager.save(subgroupsToAdd.map((x) => {
+          return this.subgroupRepository.create(x);
+        }));
+      }
+
+    });
+
+    return {
+      message: 'El grupo y subgrupos han sido actualizados'
+    };
   }
 
   /**
