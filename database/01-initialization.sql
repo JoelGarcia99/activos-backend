@@ -97,7 +97,7 @@ CREATE TABLE `Mantenimiento`(
   `motivo` enum('PREVENTIVO', 'CORRECTIVO', 'PREVENTIVO Y CORRECTIVO') NOT NULL,
   `descripcion` text NULL,
   `responsableId` int NOT NULL,
-  `fecha_solicitud` date NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fecha_solicitud` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   constraint `fk_mantenimiento_responsableId` foreign key (`responsableId`) references `Responsable`(`id`)
     on update cascade on delete no action
 )engine=InnoDB;
