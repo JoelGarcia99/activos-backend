@@ -37,10 +37,15 @@ export class MaintenanceController {
    * Gets all the available maintenances from the last one to the previous one
    */
   @Get()
-  async findAll(@Query('page') page: number, @Query('limit') limit: number) {
+  async findAll(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('q') q: string
+  ) {
     return await this.maintenanceService.findAll(
       +(page ?? 1),
-      +(limit ?? 10)
+      +(limit ?? 10),
+      q
     );
   }
 }

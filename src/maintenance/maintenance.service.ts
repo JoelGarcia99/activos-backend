@@ -3,7 +3,7 @@ import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Maintenance } from './entities/maintenance.entity';
-import { Repository } from 'typeorm';
+import { Like, Raw, Repository } from 'typeorm';
 import { Responsible } from 'src/responsible/entities/responsible.entity';
 import { Asset } from 'src/assets/entities/asset.entity';
 import { DbOutputProcessor } from 'src/utils/processors/mysql.errors';
@@ -102,12 +102,30 @@ export class MaintenanceService {
    */
   async findAll(
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    q: string = ''
   ) {
+
     return await this.maintenanceRepository.find({
       order: {
         requestDate: 'DESC',
         id: 'DESC'
+      },
+      relations: {
+        asset: true,
+      },
+      where: q.length > 0 && {
+        asset: [
+          {
+            name: Raw((alias) => `UPPER(${alias}) LIKE '%${q.toUpperCase()}%'`),
+          },
+          {
+            serie: Raw((alias) => `UPPER(${alias}) LIKE '%${q.toUpperCase()}%'`),
+          },
+          {
+            model: Raw((alias) => `UPPER(${alias}) LIKE '%${q.toUpperCase()}%'`),
+          },
+        ],
       },
       skip: (page - 1) * limit,
       take: limit,
