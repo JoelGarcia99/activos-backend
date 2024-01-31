@@ -96,4 +96,21 @@ export class MaintenanceService {
       take: limit,
     });
   }
+
+  /**
+   *
+   */
+  async findAll(
+    page: number = 1,
+    limit: number = 10
+  ) {
+    return await this.maintenanceRepository.find({
+      order: {
+        requestDate: 'DESC',
+        id: 'DESC'
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+  }
 }
